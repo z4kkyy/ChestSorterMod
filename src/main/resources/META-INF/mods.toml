@@ -1,0 +1,6 @@
+modLoader="javafml"
+loaderVersion="[55,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId = "chestsorter"
