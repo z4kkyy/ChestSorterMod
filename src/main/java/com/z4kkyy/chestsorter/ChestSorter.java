@@ -18,6 +18,7 @@ public class ChestSorter {
     public ChestSorter(FMLJavaModLoadingContext context) {
         context.getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.register(new PlayerContainerEventHandler());
+        MinecraftForge.EVENT_BUS.register(new BlockBreakEventHandler());
     }
 
     private void setup(final FMLCommonSetupEvent event) {
