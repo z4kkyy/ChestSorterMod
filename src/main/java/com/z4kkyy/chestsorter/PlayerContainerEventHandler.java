@@ -59,19 +59,18 @@ public class PlayerContainerEventHandler {
             // Sort and merge
             try {
                 sortAndMergeChestContents(inv);
-                LOGGER.info("Sorting completed successfully");
             } catch (Exception e) {
                 LOGGER.error("Error during sorting chest contents", e);
             }
             Player player = event.getEntity();
-            LOGGER.info("Sorted chest for {}", player.getName().getString());
+            LOGGER.info("Chest sort logic complete for {}", player.getName().getString());
         }
     }
 
     private boolean isStandardChestInventory(Container inv) {
         // Check if the inventory is a ChestBlockEntity (single chest)
         if (inv instanceof ChestBlockEntity) {
-            LOGGER.info("Found single chest inventory");
+            // LOGGER.debug("Found single chest inventory");
             return true;
         }
 
@@ -80,7 +79,7 @@ public class PlayerContainerEventHandler {
         // As they are private fields, use reflection maybe?
         // :(
         if (inv instanceof CompoundContainer && inv.getContainerSize() == 54) {
-            LOGGER.info("Found large chest inventory");
+            // LOGGER.debug("Found large chest inventory");
             return true;
         }
 
