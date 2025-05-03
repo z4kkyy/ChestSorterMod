@@ -4,14 +4,21 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
+
 public class ItemSorter {
+
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Map<String, Integer> CATEGORY_PRIORITIES = createCategoryPriorities();
 
@@ -33,6 +40,8 @@ public class ItemSorter {
         priorities.put("bow", priority++);
         priorities.put("trident", priority++);
         priorities.put("crossbow", priority++);
+        priorities.put("elytra", priority++);
+        priorities.put("shield", priority++);
 
         // ==== 防具 ====
         priorities.put("helmet", priority++);
@@ -59,10 +68,11 @@ public class ItemSorter {
         priorities.put("dirt", priority++);
         priorities.put("sand", priority++);
         priorities.put("gravel", priority++);
+        priorities.put("cobble", priority++);
 
         // ==== 建材 - 汎用 ====
-        priorities.put("stairs", priority++);
         priorities.put("slab", priority++);
+        priorities.put("stairs", priority++);
         priorities.put("fence", priority++);
         priorities.put("door", priority++);
         priorities.put("trapdoor", priority++);
@@ -70,11 +80,8 @@ public class ItemSorter {
         priorities.put("button", priority++);
         priorities.put("pressure_plate", priority++);
 
-        // ==== 自然ブロック ====
-        priorities.put("leaves", priority++);
-        priorities.put("sapling", priority++);
-        priorities.put("flower", priority++);
-        priorities.put("grass", priority++);
+        // ==== 鉱石 ====
+        priorities.put("ore", priority++);
 
         // ==== 装飾関連 ====
         priorities.put("wool", priority++);
@@ -85,9 +92,7 @@ public class ItemSorter {
         priorities.put("terracotta", priority++);
         priorities.put("concrete", priority++);
         priorities.put("glass", priority++);
-
-        // ==== 鉱石 ====
-        priorities.put("_ore", priority++);
+        priorities.put("pumpkin", priority++);
 
         // ==== 素材 ====
         priorities.put("ingot", priority++);
@@ -103,6 +108,10 @@ public class ItemSorter {
         priorities.put("netherite", priority++);
         priorities.put("quartz", priority++);
         priorities.put("amethyst", priority++);
+        priorities.put("sculk", priority++);
+
+        // ==== その他ブロック ====
+        priorities.put("block", priority++);
 
         // ==== 機能ブロック ====
         priorities.put("chest", priority++);
@@ -113,6 +122,11 @@ public class ItemSorter {
         priorities.put("bookshelf", priority++);
         priorities.put("lectern", priority++);
         priorities.put("barrel", priority++);
+
+        // ==== Utility ====
+        priorities.put("torch", priority++);
+        priorities.put("bucket", priority++);
+        priorities.put("firework", priority++);
 
         // ==== レッドストーン関連 ====
         priorities.put("redstone", priority++);
@@ -125,11 +139,19 @@ public class ItemSorter {
         priorities.put("dropper", priority++);
         priorities.put("dispenser", priority++);
 
+        // ==== 自然ブロック ====
+        priorities.put("leaves", priority++);
+        priorities.put("sapling", priority++);
+        priorities.put("flower", priority++);
+        priorities.put("grass", priority++);
+
         // ==== 交通手段 ====
         priorities.put("boat", priority++);
         priorities.put("minecart", priority++);
 
         // ==== 食料 ====
+        priorities.put("food", priority++);
+        priorities.put("cake", priority++);
         priorities.put("apple", priority++);
         priorities.put("bread", priority++);
         priorities.put("beef", priority++);
@@ -169,42 +191,45 @@ public class ItemSorter {
         ResourceLocation regName = ForgeRegistries.ITEMS.getKey(item);
         if (regName == null) return 9000;
 
+        // LOGGER.info("getItemCategory called for item: {}", regName);
+
+        FoodProperties foodComponent = stack.getComponents().get(DataComponents.FOOD);
+        if (foodComponent != null) {
+            // LOGGER.debug("Food component found: {}", foodComponent.toString());
+            return CATEGORY_PRIORITIES.get("food");
+        }
+
         String path = regName.getPath();
 
         // Check for exact match in CATEGORY_PRIORITIES
         if (CATEGORY_PRIORITIES.containsKey(path)) {
+            // LOGGER.debug("Exact match found: {}", path);
             return CATEGORY_PRIORITIES.get(path);
         }
 
         // Check for partial match in CATEGORY_PRIORITIES
+        int categoryPriority = -1;
         for (Map.Entry<String, Integer> entry : CATEGORY_PRIORITIES.entrySet()) {
             String key = entry.getKey();
 
-            if (path.equals(key) ||
-                path.startsWith(key + "_") ||
-                path.endsWith("_" + key) ||
-                path.contains("_" + key + "_")) {
-
-                // LOGGER.info("Partial match: {} -> {} (key: {})", path, entry.getValue(), key);
-                return entry.getValue();
+            if (path.contains(key)) {
+                categoryPriority = entry.getValue();
             }
         }
 
-        // Check for food items
-        if (stack.getComponents().has(DataComponents.FOOD)) {
-            for (String foodKey : new String[]{"food", "meat", "fishes", "eggs"}) {
-                if (CATEGORY_PRIORITIES.containsKey(foodKey)) {
-                    return CATEGORY_PRIORITIES.get(foodKey);
-                }
-            }
+        if (categoryPriority != -1) {
+            // LOGGER.debug("Partial match found: {} -> {}", path, categoryPriority);
+            return categoryPriority;
         }
 
         // Check for block items
         if (item instanceof BlockItem) {
-            return 5000;
+            // LOGGER.debug("Item is a BlockItem: {}", path);
+            return CATEGORY_PRIORITIES.get("block");
         }
 
         // Check for other items
+        // LOGGER.debug(path + " is not in CATEGORY_PRIORITIES, returning default priority.");
         return 8000;
     }
 }
