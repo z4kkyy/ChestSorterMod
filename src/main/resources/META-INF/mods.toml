@@ -3,4 +3,11 @@ loaderVersion="[55,)"
 license="All Rights Reserved"
 
 [[mods]]
-modId = "chestsorter"
+modId="chestsorter"
+version="1.0.1"
+displayName="chest sorter mod"
+authors="z4kkyy"
+description="""
+チェストを閉じた際にアイテムを自動でまとめてソートするMODです。
+A mod that sorts and merges items in chests when closed.
+"""
