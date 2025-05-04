@@ -64,11 +64,12 @@ public class ItemSorter {
 
         // ==== 石材関連 ====
         priorities.put("stone", priority++);
-        priorities.put("cobblestone", priority++);
-        priorities.put("dirt", priority++);
-        priorities.put("sand", priority++);
-        priorities.put("gravel", priority++);
         priorities.put("cobble", priority++);
+        priorities.put("deepslate", priority++);
+        priorities.put("cobblestone", priority++);
+        priorities.put("granite", priority++);
+        priorities.put("diorite", priority++);
+        priorities.put("andesite", priority++);
 
         // ==== 建材 - 汎用 ====
         priorities.put("slab", priority++);
@@ -80,10 +81,18 @@ public class ItemSorter {
         priorities.put("button", priority++);
         priorities.put("pressure_plate", priority++);
 
+        // ==== その他汎用 ====
+        priorities.put("dirt", priority++);
+        priorities.put("sand", priority++);
+        priorities.put("sandstone", priority++);
+        priorities.put("gravel", priority++);
+
         // ==== 鉱石 ====
         priorities.put("ore", priority++);
 
         // ==== 装飾関連 ====
+        priorities.put("coral_block", priority++);
+        priorities.put("coral", priority++);
         priorities.put("wool", priority++);
         priorities.put("carpet", priority++);
         priorities.put("bed", priority++);
@@ -106,12 +115,13 @@ public class ItemSorter {
         priorities.put("diamond", priority++);
         priorities.put("emerald", priority++);
         priorities.put("netherite", priority++);
+        priorities.put("dripstone", priority++);
         priorities.put("quartz", priority++);
-        priorities.put("amethyst", priority++);
         priorities.put("sculk", priority++);
 
         // ==== その他ブロック ====
         priorities.put("block", priority++);
+        priorities.put("amethyst", priority++);
 
         // ==== 機能ブロック ====
         priorities.put("chest", priority++);
@@ -144,6 +154,7 @@ public class ItemSorter {
         priorities.put("sapling", priority++);
         priorities.put("flower", priority++);
         priorities.put("grass", priority++);
+        // priorities.put("kerp", priority++);
 
         // ==== 交通手段 ====
         priorities.put("boat", priority++);
@@ -195,7 +206,7 @@ public class ItemSorter {
 
         FoodProperties foodComponent = stack.getComponents().get(DataComponents.FOOD);
         if (foodComponent != null) {
-            // LOGGER.debug("Food component found: {}", foodComponent.toString());
+            // LOGGER.debug("Food component found: {}, value: {}", foodComponent.toString(), CATEGORY_PRIORITIES.get("food"));
             return CATEGORY_PRIORITIES.get("food");
         }
 
@@ -213,12 +224,13 @@ public class ItemSorter {
             String key = entry.getKey();
 
             if (path.contains(key)) {
+                // LOGGER.debug("Partial match found: {} -> {}", path, key);
                 categoryPriority = entry.getValue();
             }
         }
 
         if (categoryPriority != -1) {
-            // LOGGER.debug("Partial match found: {} -> {}", path, categoryPriority);
+            // LOGGER.debug("Partial match found, Final priority value: {}", categoryPriority);
             return categoryPriority;
         }
 
@@ -229,7 +241,7 @@ public class ItemSorter {
         }
 
         // Check for other items
-        // LOGGER.debug(path + " is not in CATEGORY_PRIORITIES, returning default priority.");
+        LOGGER.debug(path + " is not in CATEGORY_PRIORITIES, returning default priority.");
         return 8000;
     }
 }
