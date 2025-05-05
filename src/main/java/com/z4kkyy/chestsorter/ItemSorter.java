@@ -87,9 +87,6 @@ public class ItemSorter {
         priorities.put("sandstone", priority++);
         priorities.put("gravel", priority++);
 
-        // ==== 鉱石 ====
-        priorities.put("ore", priority++);
-
         // ==== 装飾関連 ====
         priorities.put("coral_block", priority++);
         priorities.put("coral", priority++);
@@ -120,7 +117,7 @@ public class ItemSorter {
         priorities.put("sculk", priority++);
 
         // ==== その他ブロック ====
-        priorities.put("block", priority++);
+        priorities.put("ore", priority++);
         priorities.put("amethyst", priority++);
 
         // ==== 機能ブロック ====
@@ -230,18 +227,12 @@ public class ItemSorter {
         }
 
         if (categoryPriority != -1) {
-            // LOGGER.debug("Partial match found, Final priority value: {}", categoryPriority);
+            // LOGGER.debug("Partial match found for path: {}, Final priority value: {}", path, categoryPriority);
             return categoryPriority;
         }
 
-        // Check for block items
-        if (item instanceof BlockItem) {
-            // LOGGER.debug("Item is a BlockItem: {}", path);
-            return CATEGORY_PRIORITIES.get("block");
-        }
-
         // Check for other items
-        LOGGER.debug(path + " is not in CATEGORY_PRIORITIES, returning default priority.");
+        // LOGGER.debug(path + " is not in CATEGORY_PRIORITIES, returning default priority.");
         return 8000;
     }
 }
