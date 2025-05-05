@@ -3,20 +3,17 @@ package com.z4kkyy.chestsorter;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.entity.player.Player;
+// import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,7 +30,7 @@ public class PlayerContainerEventHandler {
 
     @SubscribeEvent
     public void onContainerClose(PlayerContainerEvent.Close event) {
-        LOGGER.info("onContainerClose event fired for {}", event.getEntity().getName().getString());
+        // LOGGER.info("onContainerClose event fired for {}", event.getEntity().getName().getString());
         AbstractContainerMenu menu = event.getContainer();
 
         MenuType<?> type;
@@ -62,8 +59,8 @@ public class PlayerContainerEventHandler {
             } catch (Exception e) {
                 LOGGER.error("Error during sorting chest contents", e);
             }
-            Player player = event.getEntity();
-            LOGGER.info("Chest sort logic complete for {}", player.getName().getString());
+            // Player player = event.getEntity();
+            // LOGGER.info("Chest sort logic complete for {}", player.getName().getString());
         }
     }
 
@@ -107,41 +104,43 @@ public class PlayerContainerEventHandler {
             container.setItem(idx++, s);
         }
 
-        // sync with client
+        // Sync with client
         container.setChanged();
     }
 
     private static void mergeStacks(List<ItemStack> list) {
         List<ItemStack> merged = new ArrayList<>();
-        Map<Item, Integer> itemCounts = new HashMap<>();
-        Map<Item, Integer> maxStackMap = new HashMap<>();
 
+        outer:
+        for (ItemStack current : list) {
+            if (current.isEmpty()) continue;
 
-        for (ItemStack stack : list) {
-            if (stack.isEmpty()) continue;
-            Item item = stack.getItem();
-            itemCounts.put(item, itemCounts.getOrDefault(item, 0) + stack.getCount());
-            maxStackMap.put(item, stack.getMaxStackSize());
-        }
-
-
-        for (Map.Entry<Item, Integer> entry : itemCounts.entrySet()) {
-            int itemCount = entry.getValue();
-            Item item = entry.getKey();
-
-            int maxStackSize = maxStackMap.get(item);
-            int fullStacks = itemCount / maxStackSize;
-            int remaining = itemCount % maxStackSize;
-
-            ItemStack fullStack = new ItemStack(item, maxStackSize);
-            ItemStack remainingStack = new ItemStack(item, remaining);
-
-            for (int i = 0; i < fullStacks; i++) {
-                merged.add(fullStack.copy());
+            // keep Itemstack which can't be stacked
+            if (current.getMaxStackSize() == 1) {
+                merged.add(current.copy());
+                continue;
             }
-            if (remaining > 0) {
-                merged.add(remainingStack.copy());
+
+            // Look for a stack to merge with
+            // Check if the ItemStack has the same item and the same NBT data
+            for (ItemStack acc : merged) {
+                if (ItemStack.isSameItemSameComponents(current, acc)
+                        && acc.getCount() < acc.getMaxStackSize()) {
+
+                    int transferable = Math.min(
+                            current.getCount(),
+                            acc.getMaxStackSize() - acc.getCount()
+                    );
+
+                    acc.grow(transferable);
+                    current.shrink(transferable);
+
+                    if (current.isEmpty()) continue outer;
+                }
             }
+
+            // Add the remaining stack to the merged list
+            merged.add(current.copy());
         }
 
         list.clear();
