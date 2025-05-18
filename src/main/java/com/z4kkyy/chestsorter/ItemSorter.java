@@ -24,7 +24,13 @@ public class ItemSorter {
 
     public static Comparator<ItemStack> getItemSorter() {
         return Comparator.comparing((ItemStack stack) -> stack.isEmpty() ? 1 : 0)
-                .thenComparing(ItemSorter::getItemCategory);
+                .thenComparing(ItemSorter::getItemCategory)
+                .thenComparing(stack -> {
+                    if (stack.isEmpty()) return "";
+                    Item item = stack.getItem();
+                    ResourceLocation regName = ForgeRegistries.ITEMS.getKey(item);
+                    return regName != null ? regName.toString() : "";
+                });
     }
 
     private static Map<String, Integer> createCategoryPriorities() {
